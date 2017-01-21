@@ -15,10 +15,10 @@ _localhost:8000_ in your browser to get up and running
 
 ## Sample Requests
 
-`GET /add?a=10&b=5`
+`GET /api/v1/add?a=10&b=5`
 
-`GET /subtract?a=10&b=5`
+`GET /api/v1/subtract?a=10&b=5`
 
-`GET /multiply?a=10&b=5`
+`GET /api/v1/multiply?a=10&b=5`
 
-`GET /divide?a=10&b=5`
+`GET /api/v1/divide?a=10&b=5`
