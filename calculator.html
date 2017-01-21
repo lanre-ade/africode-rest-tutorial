@@ -198,26 +198,29 @@ html {
   		var btnVal = this.innerHTML;
       var params = inputVal.split(/[\+\-\÷\x]+/); // split along math operators
       var action = operatorText(getOperator(inputVal));
-      // Now, just append the key values (btnValue) to the input string and finally use javascript's eval function to get the result
+      // Now, just append the key values (btnValue) to the input string and finally use ajax to get the result from the server
       // If clear key is pressed, erase everything
       if(btnVal == 'C') {
         input.innerHTML = '';
       }
+
+      // If we dont have any opertors continue input
       else if(!containsAny(inputVal, operators)){
         input.innerHTML += btnVal;
       }
+
+      // if its time to evaluate, we have a complete equation of '=' is presses
       else if(btnVal == '=' ||
       (containsAny(btnVal, operators) && containsAny(inputVal, operators))){
         $("#calculator span").prop('disabled',true);
         var a = params[0];
         var b = params[1];
-        if(containsAny(inputVal.charAt(0), operators)){
+        if(containsAny(inputVal.charAt(0), ['-', '+'])){ // handle negative numbers
           a = inputVal.charAt(0) + params[1];
           b = params[2];
         }
 
         $.ajax({
-
           url: "/api/v1/"+action+"?a="+a+"&b="+b,
           success: function(data) {
           //called when successful
@@ -228,12 +231,17 @@ html {
               // if any other key is pressed, just append it
                 input.innerHTML += btnVal;
               }
+            } else {
+              alert(data.message);
+              input.innerHTML = '';
             }
           },
           error: function(e) {
           //called when there is an error
             $("#calculator span").prop('disabled',false);
             console.log(e);
+            alert((e.responseJSON && e.responseJSON.message ? e.responseJSON.message : "something went wrong"));
+            input.innerHTML = '';
           }
         });
       }
