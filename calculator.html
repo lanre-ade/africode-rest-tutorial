@@ -198,21 +198,23 @@ html {
   		var btnVal = this.innerHTML;
       var params = inputVal.split(/[\+\-\÷\x]+/); // split along math operators
       var action = operatorText(getOperator(inputVal));
+
       // Now, just append the key values (btnValue) to the input string and finally use ajax to get the result from the server
       // If clear key is pressed, erase everything
       if(btnVal == 'C') {
         input.innerHTML = '';
       }
 
-      // If we dont have any opertors continue input
-      else if(!containsAny(inputVal, operators)){
-        input.innerHTML += btnVal;
+      // limit length
+      else if(inputVal.length == 16 && (btnVal != '=') && (!containsAny(btnVal, operators))){
+        alert("value too long")
       }
 
-      // if its time to evaluate, we have a complete equation of '=' is presses
+      // if its time to evaluate, we have a complete equation or '=' is pressed
       else if(btnVal == '=' ||
       (containsAny(btnVal, operators) && containsAny(inputVal, operators))){
         $("#calculator span").prop('disabled',true);
+        input.innerHTML = 'working...'
         var a = params[0];
         var b = params[1];
         if(containsAny(inputVal.charAt(0), ['-', '+'])){ // handle negative numbers
@@ -224,7 +226,7 @@ html {
           url: "/api/v1/"+action+"?a="+a+"&b="+b,
           success: function(data) {
           //called when successful
-            $("#calculator span").prop('disabled',false);
+            $(".keys span").prop('disabled',false);
             if(data.status == 200){
               input.innerHTML = data.result
               if(btnVal != "="){
@@ -237,8 +239,8 @@ html {
             }
           },
           error: function(e) {
-          //called when there is an error
-            $("#calculator span").prop('disabled',false);
+          // called when there is an error
+            $(".keys span").prop('disabled',false);
             console.log(e);
             alert((e.responseJSON && e.responseJSON.message ? e.responseJSON.message : "something went wrong"));
             input.innerHTML = '';

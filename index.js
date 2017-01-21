@@ -1,24 +1,24 @@
 var express = require('express');
-var fs = require("fs");
 var app = express();
 
 var validParam = function(val, res){
-  if(isNaN(val)){
+  if(isNaN(val)){ // if paremeter is not a number, its invalid
     res.status(400).json({
       result: null,
       message: "'"+val+"' is not a number",
       error: "Bad Parameter",
       status: 400
-    }).end();
+    }).end(); // return a 400 Error and end request
     return false;
   }
   return true;
 }
 
 app.get('/', function (req, res) {
-  res.sendFile(__dirname + '/calculator.html');
+  res.sendFile(__dirname + '/calculator.html'); // send our html file
 })
 
+// Simple endpoint to handle multiplication
 app.get('/api/v1/multiply', function (req, res) {
   if(validParam(req.query.a, res) && validParam(req.query.b, res)){
     var a  = parseFloat(req.query.a);
@@ -33,6 +33,7 @@ app.get('/api/v1/multiply', function (req, res) {
   }
 })
 
+// Simple endpoint to handle division
 app.get('/api/v1/divide', function (req, res) {
   if(validParam(req.query.a, res) && validParam(req.query.b, res)){
     var a  = parseFloat(req.query.a);
@@ -47,6 +48,7 @@ app.get('/api/v1/divide', function (req, res) {
   }
 })
 
+// Simple endpoint to handle addition
 app.get('/api/v1/add', function (req, res) {
   if(validParam(req.query.a, res) && validParam(req.query.b, res)){
     var a  = parseFloat(req.query.a);
@@ -61,6 +63,7 @@ app.get('/api/v1/add', function (req, res) {
   }
 })
 
+// Simple endpoint to handle subtraction
 app.get('/api/v1/subtract', function (req, res) {
   validParam(req.query.a, res);
   validParam(req.query.b, res);
@@ -75,6 +78,7 @@ app.get('/api/v1/subtract', function (req, res) {
   });
 })
 
+// Simple error handler
 app.use(function(err, req, res, next){
   console.log(err);
   if (res.headersSent) {
@@ -88,6 +92,7 @@ app.use(function(err, req, res, next){
   });
 });
 
+// Fall back handler for 404s
 app.use(function(req, res, next){
   res.status(404);
   // respond with json
@@ -98,20 +103,14 @@ app.use(function(req, res, next){
       error: "Not Found",
       status: 404
     });
-    res.send({ error: 'Not found' });
     return;
   }
 
-  // default to plain-text. send()
-  res.type('txt').send('Not found');
+  // default html
+  res.send('<h1>Not found<h1>');
 });
 
 var _port = 8000
 var server = app.listen(_port, function () {
-
-  var host = server.address().address || "localhost";
-  var port = server.address().port;
-
-  console.log("Example app listening at http://%s:%s", host, port)
-
+  console.log("Calculator app listening on http://localhost:%s", _port)
 })
