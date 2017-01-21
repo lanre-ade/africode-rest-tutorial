@@ -150,6 +150,10 @@ html {
 
 
 </style>
+<script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
 </head>
 <body>
   <div id="calculator">
@@ -188,11 +192,106 @@ html {
   // Add onclick event to all the keys and perform operations
   for(var i = 0; i < keys.length; i++) {
     keys[i].onclick = function(e) {
+      // Get the input and button values
+  		var input = document.querySelector('.screen');
+  		var inputVal = input.innerHTML;
+  		var btnVal = this.innerHTML;
+      var params = inputVal.split(/[\+\-\÷\x]+/); // split along math operators
+      var action = operatorText(getOperator(inputVal));
+      // Now, just append the key values (btnValue) to the input string and finally use javascript's eval function to get the result
+      // If clear key is pressed, erase everything
+      if(btnVal == 'C') {
+        input.innerHTML = '';
+      }
+      else if(!containsAny(inputVal, operators)){
+        input.innerHTML += btnVal;
+      }
+      else if(btnVal == '=' ||
+      (containsAny(btnVal, operators) && containsAny(inputVal, operators))){
+        $("#calculator span").prop('disabled',true);
+        var a = params[0];
+        var b = params[1];
+        if(containsAny(inputVal.charAt(0), operators)){
+          a = inputVal.charAt(0) + params[1];
+          b = params[2];
+        }
+
+        $.ajax({
+
+          url: "/api/v1/"+action+"?a="+a+"&b="+b,
+          success: function(data) {
+          //called when successful
+            $("#calculator span").prop('disabled',false);
+            if(data.status == 200){
+              input.innerHTML = data.result
+              if(btnVal != "="){
+              // if any other key is pressed, just append it
+                input.innerHTML += btnVal;
+              }
+            }
+          },
+          error: function(e) {
+          //called when there is an error
+            $("#calculator span").prop('disabled',false);
+            console.log(e);
+          }
+        });
+      }
+
+  		// if any other key is pressed, just append it
+  		else {
+  			input.innerHTML += btnVal;
+  		}
 
       // prevent page jumps
       e.preventDefault();
     }
   }
+
+
+  // ---------- Helper functions ----------
+  // check if string contains any value in substring array
+  function containsAny(string, substringArray){
+    for (var i = 0; i != substringArray.length; i++) {
+       var substring = substringArray[i];
+       if (string.indexOf(substring) != - 1) {
+         return true;
+       }
+    }
+    return false;
+  }
+
+  // get operator
+  function getOperator(string){
+    for (var i = 0; i != operators.length; i++) {
+       var operator = operators[i];
+       if (string.indexOf(operator) != - 1) {
+         return operator;
+       }
+    }
+    return false;
+  }
+
+  // get operator as text
+  function operatorText(operator){
+    switch (operator) {
+      case "+":
+        return "add";
+        break;
+      case "-":
+      return "subtract";
+        break;
+      case "x":
+      return "multiply";
+        break;
+      case "÷":
+      return "divide";
+        break;
+      default:
+      return "";
+    }
+  }
+
   </script>
   <!-- PrefixFree -->
   <script src="http://thecodeplayer.com/uploads/js/prefixfree-1.0.7.js" type="text/javascript" type="text/javascript"></script>
